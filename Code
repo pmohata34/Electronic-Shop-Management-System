@@ -1,0 +1,278 @@
+from datetime import datetime
+import mysql.connector as myc
+
+print("""
+____________________________________________________________________
+
+                     WELCOME TO ELECTRONIC SHOP
+____________________________________________________________________
+""")
+
+con=myc.connect(host="localhost",user="root",password="12345",database="SHOP")
+cur=con.cursor()
+
+cur.execute("DROP DATABASE IF EXISTS SHOP")
+cur.execute("CREATE DATABASE SHOP")
+cur.execute("USE SHOP")
+
+
+##TABLES FOR ADMIN
+
+cur.execute("CREATE TABLE IF NOT EXISTS LOGIN(USERNAME VARCHAR(25) NOT NULL,PASSWORD VARCHAR(25) NOT NULL)")
+
+cur.execute("CREATE TABLE IF NOT EXISTS STOCK(PCODE INT NOT NULL PRIMARY KEY,PCATEGORY CHAR(25) NOT NULL,PNAME VARCHAR(50) NOT NULL,QUANTITY INT NOT NULL,PRICE INT NOT NULL,WARRANTY VARCHAR(15) NOT NULL)")
+
+#ENTRY FOR FRIDGE
+cur.execute ("INSERT INTO STOCK VALUES(101,'FRIDGE','SAMSUNG TRIPLE COOLING  680L',2,150000,'10 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(102,'FRIDGE','GODREJ ECON  260L',2,20000,'10 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(103,'FRIDGE','WHIRPOOL SINGLE DOOR  185L',5,14000,'7 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(104,'FRIDGE','LG DOUBLE DOOR   220L',7,24000,'10 YEARS')")
+
+#ENTRY FOR AC
+cur.execute ("INSERT INTO STOCK VALUES(201,'AC','SAMSUNG 5 STAR  1.5 TON',4,40000,'10 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(202,'AC','LG AI DUAL  1 TON',5,40000,'5 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(203,'AC','BLUESTAR  1.5 TON',7,60000,'5 YEARS')")
+
+#ENTRY FOR WASHING WASHING
+cur.execute ("INSERT INTO STOCK VALUES(301,'WASHING MACHINE','SAMSUNG FRONT LOAD AUTOMATIC  6.5KG',4,40000,'10 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(302,'WASHING MACHINE','CROMA SEMI-AUTO  6KG',3,8500,'7 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(303,'WASHING MACHINE','WHIRLPOOL SEMI-AUTO  7.5KG',2,10000,'10 YEARS')")
+
+#ENTRY FOR PHONE
+cur.execute ("INSERT INTO STOCK VALUES(401,'PHONE','VIVO Y30',2,15000,'1 YEAR')")
+cur.execute ("INSERT INTO STOCK VALUES(402,'PHONE','SAMSUNG F62 ',3,24000,'1 YEAR')")
+cur.execute ("INSERT INTO STOCK VALUES(403,'PHONE','OPPO A74 5G',2,16000,'1 YEAR')")
+cur.execute ("INSERT INTO STOCK VALUES(404,'PHONE','REALME C32',4,20000,'1 YEAR')")
+cur.execute ("INSERT INTO STOCK VALUES(405,'PHONE','REDMI 6A',5,9000,'1 YEAR')")
+cur.execute ("INSERT INTO STOCK VALUES(406,'PHONE','IPHONE 14',4,145000,'2 YEARS')")
+
+#ENTRY FOR LAPTOP
+cur.execute ("INSERT INTO STOCK VALUES(501,'LAPTOP','SAMSUNG GALAXY 2',5,98000,'5 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(502,'LAPTOP','HP 14S ',2,50000,'5 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(503,'LAPTOP','DELL 50',3,60000,'5 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(504,'LAPTOP','LENOVO 14S',4,55000,' 5 YEARS')")
+cur.execute ("INSERT INTO STOCK VALUES(505,'LAPTOP','APPLE MACBOOK 16',2,242000,'7 YEARS')")
+
+con.commit()
+
+
+##TABLES FOR CUSTOMER
+
+cur.execute("CREATE TABLE IF NOT EXISTS PURCHASE (NAME VARCHAR(25) NOT NULL,PCODE INT NOT NULL,AMOUNT INT NOT NULL)")
+
+cur.execute("CREATE TABLE  IF NOT EXISTS ITEMS(SERIAL_NO INT NOT NULL,PRODUCT_NAME VARCHAR(25) NOT NULL)")
+
+#ENTRY FOR ITEMS
+cur.execute("INSERT INTO ITEMS VALUES(1,'FRIDGE')")
+cur.execute("INSERT INTO ITEMS VALUES(2,'AC')")
+cur.execute("INSERT INTO ITEMS VALUES(3,'WASHING MACHINE')")
+cur.execute("INSERT INTO ITEMS VALUES(4,'PHONES')")
+cur.execute("INSERT INTO ITEMS VALUES(5,'LAPTOP')")
+con.commit()
+
+
+######MAIN
+x=0
+cur.execute("SELECT * FROM LOGIN")
+for i in cur:
+    x+=1
+if x==0:
+    cur.execute("INSERT INTO LOGIN VALUES('USERNAME','12345')")
+    con.commit()
+while True:
+    print("""
+1.  ADMIN
+2.  CUSTOMER
+3.   EXIT
+""")
+    ch=int(input("ENTER YOUR CHOICE: "))
+
+####CODE FOR ADMIN
+    if ch==1:
+        pwd=input("ENTER PASSWORD:")
+        cur.execute("SELECT * FROM LOGIN")
+        for i in cur:
+            username,password=i
+        if pwd==password:
+            print("LOGIN SUCCESSFULLY AS ADMIN")
+
+            loop2="Y"
+            while (loop2=="Y" or loop2=="y") :
+                
+                print("""
+            1. DISPLAYING ALL ITEMS 
+            2.  ADD NEW ITEM
+            3.  UPDATING ITEM PRICE
+            4.  DELETING ITEM
+            5.  LOGOUT
+            """)
+
+                ch=int(input("ENTER YOUR CHOICE:"))
+
+                #FOR DISPLAYING ALL ITEMS
+                if ch==1:
+                        cur.execute("SELECT * FROM STOCK")
+                        rec=cur.fetchall()
+                        for row in rec:
+                            print("PCODE: ",row[0],"\t\t\tCATEGORY: ",row[1],"\t\tNAME: ",row[2])
+                            print("QUANTITY: ",row[3],"\t\t\tPRICE: ",row[4],"\t\t\tWARRANTY: ",row[5],"\n")
+
+                #FOR ADDING NEW ITEM
+                elif ch==2:
+                    loop="Y"
+                    while (loop=="Y" or loop=="y") :
+                        
+                            pcode=int(input("ENTER PRODUCT CODE:"))
+                        
+                            pcaty=input("ENTER PRODUCT CATEGORY(In CAPS):")
+                            if pcaty in ["FRIDGE","AC","WASHING MACHINE","PHONE","LAPTOP"]:
+                            
+                                pname=input("ENTER PRODUCT NAME:")
+                                pquan=int(input("ENTER PRODUCT QUANTITY:"))
+                                pprice=int(input("ENTER PRODUCT PRICE:"))
+                                pwar=input("ENTER PRODUCT WARRANTY:")
+                                cur.execute("INSERT INTO STOCK VALUES('"+str(pcode)+"','"+pcaty+"','"+pname+"','"+str(pquan)+"','"+str(pprice)+"','"+pwar+"')")
+                        
+                                con.commit()
+                                print("RECORD SUCCESSFULLY INSERTED")
+                            else:
+                                print("INVALID CATEGORY")
+                            loop=input("DO YOU WANT TO ENTER MORE ITEMS(Y/N):")
+                    loop2=input("DO YOU WANT TO CONTINUE EDITING STOCK(Y/N:)")
+
+
+                #FOR CHANGING PRICE OF THE ITEM
+                elif ch==3:
+                    loop="Y"
+                    while (loop=="Y" or loop=="y") :
+                        pcode=int(input("ENTER PRODUCT CODE:"))
+                        new_price=int(input("ENTER PRODUCT NEW PRICE:"))
+                        cur.execute("UPDATE STOCK SET PRICE='"+str(new_price)+"' WHERE pcode='"+str(pcode)+"' ")
+                        con.commit()
+                        loop=input("DO YOU WANT TO CHANGE PRICE OF ANY OTHER ITEMS(Y/N):")
+                    loop2=input("DO YOU WANT TO CONTINUE EDITING STOCK(Y/N:)")
+
+
+                #FOR DELETING ANY ITEM
+                elif ch==4:
+                    loop="Y"
+                    while (loop=="Y" or loop=="y") :
+                        pcode=int(input("ENTER PRODUCT CODE:"))
+                        cur.execute("DELETE FROM STOCK WHERE pcode='"+str(pcode)+"' ")
+                        con.commit()
+                        loop=input("DO YOU WANT TO DELETE ANY OTHER ITEM(Y/N):")
+                    loop2=input("DO YOU WANT TO CONTINUE EDITING STOCK(Y/N:)")
+
+
+                #FOR LOGOUT
+                elif ch==5:
+                    print("Logged out successfully")
+                    break
+                
+        else:
+            print("WRONG PASSWORD")
+
+            
+
+####CODE FOR CUSTOMER
+    elif ch==2:
+        uname=input("Enter Your Username:")
+        passwd=input("Enter Your Password")
+        if len(passwd)==8:
+              print("Logged in Successfully")
+              
+              while True:
+                    print("""
+                    1. TO VIEW ITEMS IN THE SHOP
+                    2. SELECT ITEM YOU WANT TO BUY
+                    3. ORDER ITEM & GENERATE BILL
+                    4. GO BACK
+                    """)
+
+                    ch2=int(input("ENTER YOUR CHOICE:"))
+
+                    #FOR VIEWING ITEMS 
+                    if ch2==1:
+                        cur.execute("SELECT * FROM ITEMS")
+                        rec=cur.fetchall()
+                        print("TOTAL NO.OF ROWS IN TABLE:",cur.rowcount)
+                        print("PRINTING EACH ROW")
+                        for row in rec:
+                            print("SERIAL_NO: ",row[0],"\t\t\t\tPRODUCT_NAME: ",row[1],"\n")
+
+                    #FOR BUY PRODUCTS
+                    elif ch2==2:
+                        c=int(input("ENTER SERIAL_NO. OF THE PRODUCT YOU WANT TO BUY:"))
+
+                        if c==1:
+                            cur.execute("SELECT PCODE,PNAME,PRICE,WARRANTY  FROM STOCK WHERE PCATEGORY='FRIDGE' ")
+                            rec=cur.fetchall()
+                            for row in rec:
+                                print("PCODE: ",row[0],"\t\t\t\tNAME: ",row[1])
+                                print("PRICE: ",row[2],"\t\t\t\tWARRANTY: ",row[3],"\n")
+
+                        elif c==2:
+                            cur.execute("SELECT PCODE,PNAME,PRICE,WARRANTY  FROM STOCK WHERE PCATEGORY='AC' ")
+                            rec=cur.fetchall()
+                            for row in rec:
+                                print("PCODE: ",row[0],"\t\t\t\tNAME: ",row[1])
+                                print("PRICE: ",row[2],"\t\t\t\tWARRANTY: ",row[3],"\n")
+
+                        elif c==3:
+                            cur.execute("SELECT PCODE,PNAME,PRICE,WARRANTY  FROM STOCK WHERE PCATEGORY='WASHING MACHINE' ")
+                            rec=cur.fetchall()
+                            for row in rec:
+                                print("PCODE: ",row[0],"\t\t\t\tNAME: ",row[1])
+                                print("PRICE: ",row[2],"\t\t\t\tWARRANTY: ",row[3],"\n")
+
+                        elif c==4:
+                            cur.execute("SELECT PCODE,PNAME,PRICE,WARRANTY  FROM STOCK WHERE PCATEGORY='PHONE' ")
+                            rec=cur.fetchall()
+                            for row in rec:
+                                print("PCODE: ",row[0],"\t\t\t\tNAME: ",row[1])
+                                print("PRICE: ",row[2],"\t\t\t\tWARRANTY: ",row[3],"\n")
+
+                        elif c==5:
+                            cur.execute("SELECT PCODE,PNAME,PRICE,WARRANTY  FROM STOCK WHERE PCATEGORY='LAPTOP' ")
+                            rec=cur.fetchall()
+                            for row in rec:
+                                print("PCODE: ",row[0],"\t\t\t\tNAME: ",row[1])
+                                print("PRICE: ",row[2],"\t\t\t\tWARRANTY: ",row[3],"\n")
+                                
+                    #FOR ITEM CART   
+                    elif ch2==3:
+                        name=input("ENTER YOUR NAME:")
+                        pcode=int(input("ENTER PCODE OF THE ITEM YOU WANT TO BUY:"))
+                        qty=int(input("ENTER QUANTITY YOU WANT TO BUY:"))
+                        cur.execute("SELECT PRICE FROM STOCK WHERE PCODE='"+str(pcode)+"' ")
+                        d=cur.fetchall()
+                        price=d[0][0]
+                        amount=price*qty
+                        cur.execute("SELECT QUANTITY FROM STOCK WHERE PCODE='"+str(pcode)+"' ")
+                        f=cur.fetchall()
+                        quan=f[0][0]
+                        net_qty=quan-qty
+                        cur.execute("UPDATE STOCK SET QUANTITY='"+str(net_qty)+"' WHERE PCODE='"+str(pcode)+"' ")
+                        cur.execute("INSERT INTO PURCHASE(name,pcode,amount) VALUES('{}',{},{})".format(name,pcode,amount))
+                        con.commit()
+
+                        print("\n")
+                        print("...............................................................................................")
+                        print("                       YOUR BILL      ")
+                        print("...............................................................................................")
+                        print("Customer's name:",name)
+                        print("Quantity:",qty)
+                        print("Price of unit item:",price)
+                        print("Total amount:",amount)
+                        print("\n@@@@@@@@@@THANK YOU FOR ORDERING THE ITEM@@@@@@@@@@")
+                        print("\n\nDATE:",datetime.today())
+                        
+                    elif ch2==4:
+                        print("Going back to menu")
+                        break
+        else:
+              print("Enter 8 digit password")
+    elif ch==3:
+        print("THANK YOU FOR VISITING OUR STORE")
+        break
+
